@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ZooSluh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── VARIABLES ── */
+:root{
+  --fh:'Nunito',sans-serif; --fb:'Nunito',sans-serif;
+  /* G1 orange/yellow */
+  --g1p:#FF8C00; --g1s:#FFD700; --g1bg:#FFF8E7; --g1card:#FFF3CD; --g1dk:#B35900;
+  /* G2 purple/pink */
+  --g2p:#9B59B6; --g2s:#F06292; --g2bg:#FBF0FF; --g2card:#F0E6FF; --g2dk:#6C3483;
+  /* G3 blue/teal */
+  --g3p:#1976D2; --g3s:#00ACC1; --g3bg:#E3F2FD; --g3card:#B3E5FC; --g3dk:#0D47A1;
+  /* G4 green */
+  --g4p:#2E7D32; --g4s:#66BB6A; --g4bg:#E8F5E9; --g4card:#C8E6C9; --g4dk:#1B5E20;
+  /* common */
+  --ok:#27AE60; --err:#E74C3C; --star:#F39C12;
+  --sh1:0 2px 8px rgba(0,0,0,.09);
+  --sh2:0 6px 20px rgba(0,0,0,.13);
+  --sh3:0 14px 40px rgba(0,0,0,.17);
+  --r:24px; --rb:16px;
+}
+
+/* ── BASE ── */
+html{font-family:var(--fb);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:#eef0ff;overflow-x:hidden}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex;animation:fadeIn .3s ease}
+
+/* ── KEYFRAMES ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounceIn{0%{transform:scale(0);opacity:0}50%{transform:scale(1.28)}75%{transform:scale(.92)}100%{transform:scale(1);opacity:1}}
+@keyframes correctPop{0%{transform:scale(1)}35%{transform:scale(1.14)}65%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-9px)}30%{transform:translateX(9px)}45%{transform:translateX(-7px)}60%{transform:translateX(7px)}75%{transform:translateX(-4px)}90%{transform:translateX(4px)}}
+@keyframes heroBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@keyframes starFall{from{opacity:1;transform:translateY(-60px) rotate(0deg)}to{opacity:.15;transform:translateY(108vh) rotate(560deg)}}
+@keyframes popIn{0%{transform:scale(.35);opacity:0}65%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
+@keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+@keyframes celebIn{0%{transform:translate(-50%,-50%) scale(0);opacity:0}35%{transform:translate(-50%,-50%) scale(1.3);opacity:1}75%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.1);opacity:0}}
+@keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;box-shadow:var(--sh1);position:sticky;top:0;z-index:20}
+.hdr-logo{font-family:var(--fh);font-size:1.55rem;font-weight:800;color:#333}
+.hdr-stars{display:flex;align-items:center;gap:5px;font-family:var(--fb);font-weight:800;font-size:1.05rem;color:var(--star);background:#FFF9E6;padding:7px 14px;border-radius:50px;border:2px solid #FFE082}
+
+/* ── HOME ── */
+#screen-home{background:linear-gradient(148deg,#667eea 0%,#764ba2 100%)}
+#screen-home .hdr{background:rgba(255,255,255,.13);backdrop-filter:blur(10px);box-shadow:none;border-bottom:1px solid rgba(255,255,255,.22)}
+#screen-home .hdr-logo{color:#fff}
+#screen-home .hdr-stars{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.38);color:#FFD700}
+
+/* compact intro — splash handles the big welcome */
+.home-intro{padding:16px 20px 2px;text-align:center;color:#fff}
+.home-intro-txt{font-size:clamp(1rem,4vw,1.2rem);font-weight:700;opacity:.86;letter-spacing:.3px}
+
+/* ── GAMES GRID — mobile: horizontal scroll carousel ── */
+.games-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:14px;padding:14px 20px 22px;width:100%;scrollbar-width:none;-ms-overflow-style:none}
+.games-grid::-webkit-scrollbar{display:none}
+
+/* base card */
+.game-card{flex-shrink:0;width:78vw;max-width:285px;min-height:220px;border-radius:var(--r);padding:20px 18px;cursor:pointer;position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;box-shadow:0 10px 28px rgba(0,0,0,.22);transition:transform .2s ease,box-shadow .2s ease;animation:fadeInUp .5s ease backwards;scroll-snap-align:start;border:none}
+.game-card:nth-child(1){animation-delay:.08s}
+.game-card:nth-child(2){animation-delay:.16s}
+.game-card:nth-child(3){animation-delay:.24s}
+.game-card:nth-child(4){animation-delay:.32s}
+.game-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 18px 44px rgba(0,0,0,.28)}
+.game-card:active{transform:scale(.96)}
+
+/* decorative blobs inside each card */
+.gc-deco{position:absolute;border-radius:50%;pointer-events:none;top:-45px;right:-42px}
+.gc-deco::after{content:'';position:absolute;border-radius:50%}
+.gc-deco1{width:155px;height:155px;background:rgba(255,255,255,.14)}
+.gc-deco1::after{width:85px;height:85px;background:rgba(255,255,255,.1);top:88px;left:-60px}
+.gc-deco2{width:145px;height:145px;background:rgba(255,255,255,.13)}
+.gc-deco2::after{width:80px;height:80px;background:rgba(255,255,255,.1);top:82px;left:-55px}
+.gc-deco3{width:150px;height:150px;background:rgba(255,255,255,.13)}
+.gc-deco3::after{width:90px;height:90px;background:rgba(255,255,255,.1);top:85px;left:-62px}
+.gc-deco4{width:158px;height:158px;background:rgba(255,255,255,.12)}
+.gc-deco4::after{width:88px;height:88px;background:rgba(255,255,255,.1);top:90px;left:-58px}
+
+/* large faded icon watermark top-right */
+.gc-icon-bg{position:absolute;top:10px;right:14px;opacity:.26;pointer-events:none;user-select:none;display:flex}
+
+/* text content */
+.gc-content{position:relative;z-index:1;display:flex;flex-direction:column}
+.gc-animal{font-size:clamp(3.2rem,12vw,4rem);line-height:1;margin-bottom:9px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));animation:heroBounce 2.5s ease-in-out infinite;flex-shrink:0;display:block}
+.gc-animal svg{width:1em;height:1em;display:block}
+.game-card:nth-child(1) .gc-animal{animation-delay:.2s}
+.game-card:nth-child(2) .gc-animal{animation-delay:.75s}
+.game-card:nth-child(3) .gc-animal{animation-delay:1.3s}
+.game-card:nth-child(4) .gc-animal{animation-delay:1.85s}
+.gc-title{font-family:var(--fh);font-weight:800;font-size:clamp(1.5rem,5.8vw,2.05rem);color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.3);margin-bottom:5px;letter-spacing:.25px;line-height:1.15}
+.gc-desc{font-size:1rem;color:rgba(255,255,255,.88);font-weight:600;line-height:1.4}
+
+/* card colour themes */
+.gc1{background:linear-gradient(140deg,#FF6B35 0%,#FFB347 100%)}
+.gc2{background:linear-gradient(140deg,#8E24AA 0%,#EC407A 100%)}
+.gc3{background:linear-gradient(140deg,#1565C0 0%,#00ACC1 100%)}
+.gc4{background:linear-gradient(140deg,#2E7D32 0%,#66BB6A 100%)}
+
+/* ── GAME HEADER ── */
+.ghdr{display:flex;align-items:center;padding:13px 16px;gap:10px}
+.btn-back{background:rgba(255,255,255,.92);border:none;border-radius:50%;width:52px;height:52px;font-size:1.3rem;cursor:pointer;box-shadow:var(--sh1);transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-back:hover{transform:scale(1.1);box-shadow:var(--sh2)}
+.btn-back:active{transform:scale(.92)}
+.ghdr-title{font-family:var(--fh);font-size:1.35rem;font-weight:800;flex:1;color:#fff}
+.score-pill{background:rgba(255,255,255,.92);border-radius:50px;padding:7px 15px;font-weight:800;font-size:1rem;color:var(--star);box-shadow:var(--sh1);flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+
+/* ── GAME CONTENT ── */
+.gcont{flex:1;padding:clamp(12px,3vw,18px) 16px;display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2.2vw,16px);overflow-y:auto}
+
+/* ── ANIMAL CARDS ── */
+.agrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:480px}
+
+.acard{min-height:clamp(100px,22vw,130px);border-radius:var(--r);padding:clamp(12px,3vw,18px) 8px;text-align:center;cursor:pointer;box-shadow:var(--sh1);transition:transform .15s ease,box-shadow .15s ease;animation:fadeInUp .38s ease backwards;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2.5px solid rgba(255,255,255,.55);user-select:none;-webkit-user-select:none}
+.acard:hover{transform:scale(1.05);box-shadow:var(--sh2)}
+.acard:active{transform:scale(.95)}
+.acard .ae{font-size:clamp(2rem,8vw,3rem);line-height:1}
+.acard .an{font-size:clamp(16px,4vw,18px);font-weight:800}
+
+.acard.correct{animation:correctPop .55s ease forwards !important;background:var(--ok) !important;color:#fff !important;border-color:var(--ok) !important}
+.acard.wrong{animation:shake .48s ease forwards !important;background:var(--err) !important;color:#fff !important;border-color:var(--err) !important}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:12px 24px;border:none;border-radius:var(--rb);font-family:var(--fb);font-size:1.05rem;font-weight:800;cursor:pointer;box-shadow:var(--sh1);transition:transform .15s,box-shadow .15s;color:#fff;text-decoration:none}
+.btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:var(--sh2)}
+.btn:active{transform:scale(.97);box-shadow:none}
+.btn-lg{font-size:1.2rem;min-height:62px;padding:16px 32px;border-radius:20px}
+.btn-gold{background:linear-gradient(135deg,#F39C12,#FFD700);color:#333}
+.btn-gray{background:linear-gradient(135deg,#636e72,#b2bec3)}
+
+.btn-snd{background:#fff;border-radius:50px;padding:10px 22px;font-size:1rem;font-weight:800;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:var(--sh1);border:2.5px solid;min-height:56px;display:inline-flex;align-items:center;gap:6px;font-family:var(--fb)}
+.btn-snd:hover{transform:scale(1.05);box-shadow:var(--sh2)}
+.btn-snd:active{transform:scale(.95)}
+
+/* ── PROGRESS BAR ── */
+.pbar-wrap{width:100%;max-width:480px;background:rgba(255,255,255,.45);border-radius:20px;height:11px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.1)}
+.pbar{height:100%;border-radius:20px;transition:width .28s ease}
+.qctr{font-weight:800;font-size:1rem}
+
+/* ── INSTRUCTION BOX ── */
+.instr{background:rgba(255,255,255,.92);border-radius:18px;padding:12px 18px;text-align:center;box-shadow:var(--sh1);max-width:480px;width:100%}
+.instr p{font-size:1rem;font-weight:700;color:#444;line-height:1.5}
+
+/* ════════════════════════════════
+   GAME 1 — orange/yellow
+════════════════════════════════ */
+#screen-game1{background:var(--g1bg)}
+#screen-game1 .ghdr{background:linear-gradient(135deg,var(--g1p),var(--g1s))}
+#screen-game1 .acard{background:var(--g1card);border-color:var(--g1s)}
+#screen-game1 .acard .an{color:var(--g1dk)}
+#screen-game1 .pbar{background:var(--g1p)}
+#screen-game1 .qctr{color:var(--g1dk)}
+#screen-game1 .btn-snd{border-color:var(--g1p);color:var(--g1dk)}
+.g1-prompt h2{font-family:var(--fh);font-size:1.55rem;font-weight:800;color:var(--g1dk);text-align:center}
+
+/* ════════════════════════════════
+   GAME 2 — purple/pink
+════════════════════════════════ */
+#screen-game2{background:var(--g2bg)}
+#screen-game2 .ghdr{background:linear-gradient(135deg,var(--g2p),var(--g2s))}
+
+.g2-wrap{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px}
+.g2-lbl{font-family:var(--fh);font-size:1rem;text-align:center;color:#999}
+.g2sg,.g2ig{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+
+.g2sc{background:var(--g2card);border:2.5px solid var(--g2s);border-radius:20px;padding:clamp(10px,2.5vw,14px) 8px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;box-shadow:var(--sh1);min-height:clamp(60px,16vw,80px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.g2sc:hover{transform:scale(1.05);box-shadow:var(--sh2)}
+.g2sc:active{transform:scale(.96)}
+.g2sc.sel{border-color:var(--g2p);background:#fff;box-shadow:0 0 0 4px rgba(155,89,182,.22),var(--sh2);transform:scale(1.06)}
+.g2sc .si{font-size:1.8rem}
+.g2sc .sn{font-weight:800;font-size:1rem;color:var(--g2dk)}
+.g2sc.matched{opacity:0;pointer-events:none;transform:scale(.35) rotate(18deg);transition:all .42s ease}
+
+.g2ic{background:#fff;border:2.5px solid #E8D5FF;border-radius:20px;padding:clamp(10px,2.5vw,14px) 8px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;box-shadow:var(--sh1);min-height:clamp(60px,16vw,80px);display:flex;align-items:center;justify-content:center}
+.g2ic:hover{transform:scale(1.05);box-shadow:var(--sh2)}
+.g2ic:active{transform:scale(.96)}
+.g2ic .ie{font-size:2.8rem}
+.g2ic.matched{opacity:0;pointer-events:none;transform:scale(.35) rotate(-14deg);transition:all .42s ease}
+.g2ic.wrong{animation:shake .48s ease;background:#FFEBEE;border-color:var(--err)}
+
+/* ════════════════════════════════
+   GAME 3 — blue/teal
+════════════════════════════════ */
+#screen-game3{background:var(--g3bg)}
+#screen-game3 .ghdr{background:linear-gradient(135deg,var(--g3p),var(--g3s))}
+#screen-game3 .acard{background:var(--g3card);border-color:var(--g3s)}
+#screen-game3 .acard .an{color:var(--g3dk)}
+#screen-game3 .qctr{color:var(--g3dk)}
+
+.g3-target{text-align:center;background:#fff;border-radius:var(--r);padding:18px 28px;box-shadow:var(--sh2);border:2.5px solid var(--g3s);max-width:380px;width:100%}
+.g3-tlbl{font-size:1rem;font-weight:700;color:var(--g3p);margin-bottom:4px}
+.g3-tanim{font-family:var(--fh);font-size:2rem;font-weight:800;color:#222}
+
+.g3-tmr{width:100%;max-width:480px}
+.g3-tmr-top{display:flex;justify-content:space-between;font-weight:800;margin-bottom:5px;color:var(--g3p);font-size:1rem}
+.g3-tbar-wrap{background:rgba(255,255,255,.5);border-radius:20px;height:14px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.1)}
+.g3-tbar{background:var(--g3s);height:100%;border-radius:20px;width:100%}
+.g3-tbar.urgent{background:#E74C3C;animation:timerPulse .4s ease infinite}
+
+/* ════════════════════════════════
+   GAME 4 — green
+════════════════════════════════ */
+#screen-game4{background:var(--g4bg)}
+#screen-game4 .ghdr{background:linear-gradient(135deg,var(--g4p),var(--g4s))}
+
+.g4-target{background:#fff;border-radius:var(--r);padding:14px 22px;text-align:center;box-shadow:var(--sh2);border:2.5px solid var(--g4s);max-width:400px;width:100%}
+.g4-tlbl{font-size:1rem;font-weight:700;color:var(--g4p)}
+.g4-tanim{font-family:var(--fh);font-size:1.95rem;font-weight:800;color:#222}
+
+.g4-stage{width:100%;max-width:460px;min-height:210px;background:#fff;border-radius:var(--r);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh2);border:2.5px solid var(--g4card);position:relative;overflow:hidden}
+.g4-ad{text-align:center;cursor:pointer;animation:popIn .32s ease;padding:24px;border-radius:20px;transition:background .15s}
+.g4-ad:hover{background:var(--g4card)}
+.g4-ad:active{transform:scale(.95)}
+.g4-ae{font-size:5rem;display:block}
+.g4-an{font-family:var(--fh);font-size:1.5rem;font-weight:800;color:#333;margin-top:6px}
+.g4-wait{font-size:1.4rem;color:#bbb;font-weight:700;padding:20px;text-align:center}
+
+.g4-dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:280px}
+.dot{width:18px;height:18px;border-radius:50%;background:#ddd;transition:background .25s}
+.dot.ok{background:var(--ok)}
+.dot.err{background:var(--err)}
+.dot.miss{background:#FFA726}
+.dot.cur{background:var(--g4p);animation:dotPulse .8s infinite}
+.g4-pts{font-family:var(--fh);font-size:1.3rem;font-weight:800;color:var(--g4dk)}
+
+/* ════════════════════════════════
+   RESULT SCREEN
+════════════════════════════════ */
+#screen-result{background:linear-gradient(148deg,#667eea 0%,#764ba2 100%)}
+#screen-result .hdr{background:rgba(255,255,255,.13);backdrop-filter:blur(10px);box-shadow:none;border-bottom:1px solid rgba(255,255,255,.22)}
+#screen-result .hdr-logo{color:#fff}
+#screen-result .hdr-stars{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.38);color:#FFD700}
+
+.res-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;color:#fff;gap:18px}
+.res-stars{font-size:3.5rem;animation:bounceIn .6s ease}
+.res-score{font-family:var(--fh);font-size:4rem;font-weight:800;color:#FFD700;text-shadow:0 3px 14px rgba(0,0,0,.3);animation:bounceIn .6s .18s ease backwards}
+.res-msg{font-size:1.25rem;font-weight:700;opacity:.95;max-width:290px;line-height:1.5;animation:fadeInUp .5s .34s ease backwards}
+.res-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;animation:fadeInUp .5s .5s ease backwards}
+
+/* ── PARTICLES ── */
+.sp{position:fixed;pointer-events:none;animation:starFall linear forwards;z-index:999}
+
+/* ── SVG ICON SIZING ── */
+.ae svg,.g4-ae svg{width:1em;height:1em;display:inline-block;vertical-align:top}
+.spl-a svg{width:1em;height:1em;display:inline-block}
+.splash-lion svg{width:1em;height:1em;display:block;margin:0 auto}
+.gc-icon-bg svg{width:56px;height:56px}
+.g2ic .ie svg{width:1em;height:1em;display:block}
+.g2sc .si svg{width:1em;height:1em;vertical-align:-.1em}
+.hdr-stars svg,.score-pill svg{width:1.1em;height:1.1em;vertical-align:-.2em;flex-shrink:0}
+.res-stars svg{width:1em;height:1em;vertical-align:top}
+.diff-emoji svg{width:2.2rem;height:2.2rem;display:block}
+.sp svg{display:block}
+
+/* ── CELEBRATION ── */
+.celeb{position:fixed;top:50%;left:50%;font-family:var(--fh);font-size:2.8rem;font-weight:800;color:#fff;text-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none;z-index:500;animation:celebIn 1.1s ease forwards;white-space:nowrap}
+
+/* ── RESPONSIVE ── */
+@media(max-width:400px){
+  /* iPhone SE and below */
+  .game-card{width:82vw}
+  .ghdr{padding:10px 12px}
+  .ghdr-title{font-size:1.1rem}
+  .g3-target{padding:12px 16px}
+  .g3-tanim{font-size:1.6rem}
+  .g4-stage{min-height:clamp(140px,40vw,180px)}
+  .g4-ae{font-size:3.5rem}
+  .diff-card{padding:12px 14px;gap:10px}
+  .diff-emoji{font-size:1.8rem}
+}
+@media(max-width:600px){
+  /* all mobile: game 3 target box compact */
+  .g3-target{padding:clamp(10px,3vw,18px) clamp(14px,5vw,28px)}
+  .g3-tanim{font-size:clamp(1.4rem,6vw,2rem)}
+  /* game 4 stage compact */
+  .g4-stage{min-height:clamp(150px,38vw,210px)}
+}
+@media(min-width:600px){
+  .agrid{grid-template-columns:repeat(4,1fr);max-width:580px}
+  /* tablet: 2×2 grid */
+  .games-grid{display:grid;grid-template-columns:repeat(2,1fr);overflow:visible;max-width:620px;margin:0 auto;padding:16px 20px 24px}
+  .game-card{width:auto;max-width:none;flex-shrink:unset;min-height:205px;scroll-snap-align:unset}
+}
+@media(min-width:860px){
+  .gcont{max-width:720px;margin:0 auto;width:100%}
+  /* desktop: asymmetric bento */
+  .games-grid{grid-template-columns:3fr 2fr;grid-template-rows:auto auto auto;max-width:760px;gap:16px;padding:18px 24px 28px}
+  .game-card:nth-child(1){grid-column:1;grid-row:1;min-height:215px}
+  .game-card:nth-child(2){grid-column:2;grid-row:1/3;min-height:330px;justify-content:flex-start;padding-top:26px}
+  .game-card:nth-child(2) .gc-icon-bg{top:auto;bottom:14px}
+  .game-card:nth-child(3){grid-column:1;grid-row:2;min-height:185px}
+  .game-card:nth-child(4){grid-column:1/3;grid-row:3;min-height:145px;flex-direction:row;align-items:center;gap:22px}
+  .game-card:nth-child(4) .gc-deco4{width:220px;height:220px;top:-70px;right:-60px}
+  .game-card:nth-child(4) .gc-content{flex:1}
+  /* game 2 — wider layout */
+  .g2-wrap{max-width:680px}
+  .g2sg,.g2ig{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ════════════════════════════════
+   SPLASH SCREEN
+════════════════════════════════ */
+#screen-splash{background:linear-gradient(148deg,#667eea 0%,#764ba2 100%);align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+#screen-splash::before{content:'';position:absolute;width:460px;height:460px;border-radius:50%;background:rgba(255,255,255,.06);top:-130px;left:-140px;pointer-events:none}
+#screen-splash::after{content:'';position:absolute;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,.06);bottom:-90px;right:-100px;pointer-events:none}
+
+.splash-inner{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 20px;max-width:460px;width:100%;position:relative;z-index:1}
+
+.splash-lion{font-size:clamp(4rem,16vw,6.5rem);display:block;line-height:1;animation:bounceIn .7s ease,heroBounce 2.5s 1s ease-in-out infinite}
+
+.splash-logo{font-family:var(--fh);font-weight:800;font-size:clamp(2.8rem,11vw,5rem);color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.28);animation:bounceIn .7s .18s ease backwards;line-height:1.1;letter-spacing:-1px}
+
+.splash-subtitle{font-size:clamp(1rem,4vw,1.35rem);font-weight:700;color:rgba(255,255,255,.88);animation:fadeInUp .6s .58s ease backwards;letter-spacing:.4px}
+
+.splash-animals{display:flex;gap:clamp(6px,2.5vw,16px);justify-content:center;flex-wrap:wrap;margin:10px 0;max-width:360px}
+.spl-a{font-size:clamp(1.9rem,7.5vw,2.9rem);display:inline-block;animation:popIn .45s ease backwards}
+.spl-a:nth-child(1){animation-delay:.9s}
+.spl-a:nth-child(2){animation-delay:1.12s}
+.spl-a:nth-child(3){animation-delay:1.34s}
+.spl-a:nth-child(4){animation-delay:1.56s}
+.spl-a:nth-child(5){animation-delay:1.78s}
+.spl-a:nth-child(6){animation-delay:2.0s}
+
+@keyframes igrajPulse{
+  0%,100%{transform:scale(1);box-shadow:0 8px 30px rgba(0,0,0,.28),0 0 0 0 rgba(255,215,0,.55)}
+  50%{transform:scale(1.06);box-shadow:0 14px 40px rgba(0,0,0,.32),0 0 0 16px rgba(255,215,0,0)}
+}
+.btn-play{font-family:var(--fh);font-weight:800;font-size:clamp(1.3rem,5vw,1.75rem);padding:18px 56px;border:none;border-radius:50px;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#333;cursor:pointer;min-height:64px;letter-spacing:1px;margin-top:8px;transition:filter .15s,transform .12s;animation:fadeInUp .5s 2.35s ease backwards,igrajPulse 1.9s 3s ease infinite}
+.btn-play:hover{filter:brightness(1.09)}
+.btn-play:active{transform:scale(.95)!important;animation:none;filter:brightness(.95)}
+
+/* ════════════════════════════════
+   DIFFICULTY SCREEN
+════════════════════════════════ */
+#screen-diff{background:linear-gradient(148deg,#667eea 0%,#764ba2 100%);align-items:center;justify-content:center;padding:24px 20px;position:relative}
+.diff-inner{width:100%;max-width:460px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.diff-back{position:absolute;top:18px;left:18px;background:rgba(255,255,255,.18);border:none;border-radius:50%;width:52px;height:52px;font-size:1.3rem;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.diff-back:hover{background:rgba(255,255,255,.3)}
+.diff-game-name{font-size:1rem;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:1px;text-transform:uppercase}
+.diff-title{font-family:var(--fh);font-weight:800;font-size:clamp(1.6rem,7vw,2.2rem);color:#fff;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.22);margin-top:-6px}
+.diff-cards{display:flex;flex-direction:column;gap:11px;width:100%}
+.diff-card{display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:20px;cursor:pointer;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.22);transition:transform .18s,box-shadow .18s,background .18s;animation:fadeInUp .4s ease backwards;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.diff-card:nth-child(1){animation-delay:.08s}.diff-card:nth-child(2){animation-delay:.18s}.diff-card:nth-child(3){animation-delay:.28s}
+.diff-card:hover{transform:translateX(7px);background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.diff-card:active{transform:scale(.97)}
+.diff-emoji{font-size:2.2rem;flex-shrink:0;line-height:1}
+.diff-info{flex:1}
+.diff-name{font-family:var(--fh);font-weight:800;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.15)}
+.diff-hint{font-size:1rem;color:rgba(255,255,255,.8);font-weight:600;margin-top:2px;line-height:1.4}
+.diff-badge{font-size:1rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.3px;flex-shrink:0}
+.dbg-easy{background:#43A047;color:#fff}.dbg-med{background:#FB8C00;color:#fff}.dbg-hard{background:#E53935;color:#fff}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SPLASH ══════════════ -->
+<div id="screen-splash" class="screen">
+  <div class="splash-inner">
+    <span class="splash-lion"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="50" cy="52" r="34" fill="#E07830"/><circle cx="50" cy="52" r="24" fill="#F5C842"/><ellipse cx="50" cy="63" rx="12" ry="8" fill="#E8A840"/><ellipse cx="50" cy="59" rx="5" ry="3.5" fill="#B85820"/><circle cx="39" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="61" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="41" cy="44" r="2" fill="#fff"/><circle cx="63" cy="44" r="2" fill="#fff"/><line x1="28" y1="60" x2="44" y2="62" stroke="#A04010" stroke-width="1.5"/><line x1="72" y1="60" x2="56" y2="62" stroke="#A04010" stroke-width="1.5"/><path d="M42 68 Q50 74 58 68" stroke="#A04010" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+    <div class="splash-logo">ZooSluh</div>
+    <div class="splash-subtitle">Igra zvukova životinja</div>
+    <div class="splash-animals">
+      <span class="spl-a"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="27" cy="45" rx="13" ry="19" fill="#8B5E3C"/><ellipse cx="73" cy="45" rx="13" ry="19" fill="#8B5E3C"/><circle cx="50" cy="54" r="28" fill="#C88B4A"/><ellipse cx="50" cy="64" rx="13" ry="9" fill="#E5A870"/><ellipse cx="50" cy="59" rx="6" ry="4.5" fill="#4A2800"/><circle cx="37" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="63" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="39" cy="44" r="2" fill="#fff"/><circle cx="65" cy="44" r="2" fill="#fff"/><path d="M42 70 Q50 77 58 70" stroke="#4A2800" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+      <span class="spl-a"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><polygon points="24,38 12,8 40,28" fill="#E07830"/><polygon points="76,38 88,8 60,28" fill="#E07830"/><polygon points="24,38 18,16 38,30" fill="#F9BFBF"/><polygon points="76,38 82,16 62,30" fill="#F9BFBF"/><circle cx="50" cy="55" r="28" fill="#F0944A"/><ellipse cx="50" cy="66" rx="11" ry="8" fill="#F5C080"/><ellipse cx="50" cy="62" rx="4" ry="3" fill="#C06020"/><circle cx="38" cy="46" r="6" fill="#1a1a1a"/><circle cx="62" cy="46" r="6" fill="#1a1a1a"/><circle cx="40" cy="44" r="2" fill="#fff"/><circle cx="64" cy="44" r="2" fill="#fff"/><line x1="28" y1="64" x2="46" y2="65" stroke="#A04010" stroke-width="1.5"/><line x1="72" y1="64" x2="54" y2="65" stroke="#A04010" stroke-width="1.5"/><path d="M43 72 Q50 77 57 72" stroke="#A04010" stroke-width="2" fill="none" stroke-linecap="round"/></svg></span>
+      <span class="spl-a"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="50" cy="54" r="30" fill="#F2F2F2"/><path d="M36 28 Q43 16 50 22 Q57 12 66 26 Q59 20 50 24 Q43 18 36 28Z" fill="#555"/><ellipse cx="44" cy="52" rx="9" ry="11" fill="#555"/><ellipse cx="50" cy="67" rx="13" ry="9" fill="#FFBFC8"/><circle cx="45" cy="64" r="2.8" fill="#C06070"/><circle cx="55" cy="64" r="2.8" fill="#C06070"/><circle cx="36" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="66" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="38" cy="44" r="2" fill="#fff"/><circle cx="68" cy="44" r="2" fill="#fff"/></svg></span>
+      <span class="spl-a"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="22" cy="36" rx="11" ry="9" fill="#F0A0B0"/><ellipse cx="78" cy="36" rx="11" ry="9" fill="#F0A0B0"/><circle cx="50" cy="54" r="30" fill="#F4B8C8"/><circle cx="50" cy="64" r="14" fill="#F090A8"/><circle cx="44" cy="63" r="4" fill="#C05870"/><circle cx="56" cy="63" r="4" fill="#C05870"/><circle cx="37" cy="45" r="5.5" fill="#1a1a1a"/><circle cx="63" cy="45" r="5.5" fill="#1a1a1a"/><circle cx="39" cy="43" r="2" fill="#fff"/><circle cx="65" cy="43" r="2" fill="#fff"/><path d="M42 74 Q50 80 58 74" stroke="#C05870" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+      <span class="spl-a"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="50" cy="62" rx="28" ry="22" fill="#FFD740"/><circle cx="50" cy="36" r="20" fill="#FFD740"/><polygon points="68,36 87,30 87,42" fill="#FF8F00"/><circle cx="43" cy="30" r="6" fill="#1a1a1a"/><circle cx="45" cy="28" r="2" fill="#fff"/><ellipse cx="37" cy="58" rx="10" ry="7" fill="#FFC107" transform="rotate(-15 37 58)"/><path d="M36 74 Q50 82 64 74" stroke="#E0A000" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+      <span class="spl-a"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><polygon points="22,44 12,12 38,32" fill="#78909C"/><polygon points="78,44 88,12 62,32" fill="#78909C"/><polygon points="22,44 16,20 36,34" fill="#ECEFF1"/><polygon points="78,44 84,20 64,34" fill="#ECEFF1"/><circle cx="50" cy="54" r="28" fill="#90A4AE"/><ellipse cx="50" cy="64" rx="14" ry="9" fill="#ECEFF1"/><ellipse cx="50" cy="60" rx="6" ry="4" fill="#607D8B"/><circle cx="37" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="63" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="39" cy="44" r="2" fill="#fff"/><circle cx="65" cy="44" r="2" fill="#fff"/><path d="M42 70 Q50 76 58 70" stroke="#37474F" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+    </div>
+    <button class="btn-play" onclick="showScreen('screen-home')">IGRAJ!</button>
+  </div>
+</div>
+
+<!-- ══════════════ HOME ══════════════ -->
+<div id="screen-home" class="screen">
+  <header class="hdr">
+    <span class="hdr-logo">ZooSluh</span>
+    <div class="hdr-stars"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.1em" height="1.1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg> <span id="h-stars">0</span></div>
+  </header>
+  <div class="home-intro"><p class="home-intro-txt">Odaberi igru i kreni!</p></div>
+  <div class="games-grid">
+
+    <div class="game-card gc1" onclick="startGame(1)">
+      <div class="gc-deco gc-deco1"></div>
+      <span class="gc-icon-bg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor"/><path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.73 2.5-2.25 2.5-4.02z" fill="currentColor" opacity=".8"/><path d="M14 3.23v2.06C17.89 6.19 21 8.91 21 12s-3.11 5.81-7 6.71v2.06c4.9-1 8.5-5 8.5-8.77S18.9 4.23 14 3.23z" fill="currentColor" opacity=".5"/></svg></span>
+      <div class="gc-content">
+        <span class="gc-animal"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="50" cy="52" r="34" fill="#E07830"/><circle cx="50" cy="52" r="24" fill="#F5C842"/><ellipse cx="50" cy="63" rx="12" ry="8" fill="#E8A840"/><ellipse cx="50" cy="59" rx="5" ry="3.5" fill="#B85820"/><circle cx="39" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="61" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="41" cy="44" r="2" fill="#fff"/><circle cx="63" cy="44" r="2" fill="#fff"/><line x1="28" y1="60" x2="44" y2="62" stroke="#A04010" stroke-width="1.5"/><line x1="72" y1="60" x2="56" y2="62" stroke="#A04010" stroke-width="1.5"/><path d="M42 68 Q50 74 58 68" stroke="#A04010" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+        <div class="gc-title">Pogodi životinju</div>
+        <div class="gc-desc">Čuješ zvuk — pogodi koja je životinja!</div>
+      </div>
+    </div>
+
+    <div class="game-card gc2" onclick="startGame(2)">
+      <div class="gc-deco gc-deco2"></div>
+      <span class="gc-icon-bg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4C2.9 5 2 5.9 2 7v3.8h1.5a2.5 2.5 0 0 1 0 5H2V20c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V22H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z" fill="currentColor"/></svg></span>
+      <div class="gc-content">
+        <span class="gc-animal"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><polygon points="24,38 12,8 40,28" fill="#E07830"/><polygon points="76,38 88,8 60,28" fill="#E07830"/><polygon points="24,38 18,16 38,30" fill="#F9BFBF"/><polygon points="76,38 82,16 62,30" fill="#F9BFBF"/><circle cx="50" cy="55" r="28" fill="#F0944A"/><ellipse cx="50" cy="66" rx="11" ry="8" fill="#F5C080"/><ellipse cx="50" cy="62" rx="4" ry="3" fill="#C06020"/><circle cx="38" cy="46" r="6" fill="#1a1a1a"/><circle cx="62" cy="46" r="6" fill="#1a1a1a"/><circle cx="40" cy="44" r="2" fill="#fff"/><circle cx="64" cy="44" r="2" fill="#fff"/><line x1="28" y1="64" x2="46" y2="65" stroke="#A04010" stroke-width="1.5"/><line x1="72" y1="64" x2="54" y2="65" stroke="#A04010" stroke-width="1.5"/><path d="M43 72 Q50 77 57 72" stroke="#A04010" stroke-width="2" fill="none" stroke-linecap="round"/></svg></span>
+        <div class="gc-title">Uparivanje</div>
+        <div class="gc-desc">Spoji zvuk životinje s njezinom slikom!</div>
+      </div>
+    </div>
+
+    <div class="game-card gc3" onclick="startGame(3)">
+      <div class="gc-deco gc-deco3"></div>
+      <span class="gc-icon-bg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56"><path d="M7 2v11h3v9l7-12h-4l4-8z" fill="currentColor"/></svg></span>
+      <div class="gc-content">
+        <span class="gc-animal"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="50" cy="62" rx="28" ry="22" fill="#FFD740"/><circle cx="50" cy="36" r="20" fill="#FFD740"/><polygon points="68,36 87,30 87,42" fill="#FF8F00"/><circle cx="43" cy="30" r="6" fill="#1a1a1a"/><circle cx="45" cy="28" r="2" fill="#fff"/><ellipse cx="37" cy="58" rx="10" ry="7" fill="#FFC107" transform="rotate(-15 37 58)"/><path d="M36 74 Q50 82 64 74" stroke="#E0A000" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+        <div class="gc-title">Brzinac</div>
+        <div class="gc-desc">Klikni pravu životinju što brže možeš!</div>
+      </div>
+    </div>
+
+    <div class="game-card gc4" onclick="startGame(4)">
+      <div class="gc-deco gc-deco4"></div>
+      <span class="gc-icon-bg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56"><rect x="7" y="1" width="10" height="22" rx="4" fill="currentColor" opacity=".25"/><rect x="7" y="1" width="10" height="22" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="6.5" r="2.2" fill="#ff6b6b"/><circle cx="12" cy="12" r="2.2" fill="#ffd740"/><circle cx="12" cy="17.5" r="2.2" fill="#55efc4"/></svg></span>
+      <div class="gc-content">
+        <span class="gc-animal"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="26" cy="33" r="15" fill="#4CAF50"/><circle cx="74" cy="33" r="15" fill="#4CAF50"/><circle cx="26" cy="33" r="10" fill="#1a1a1a"/><circle cx="74" cy="33" r="10" fill="#1a1a1a"/><circle cx="29" cy="30" r="3.5" fill="#fff"/><circle cx="77" cy="30" r="3.5" fill="#fff"/><circle cx="50" cy="63" r="30" fill="#66BB6A"/><ellipse cx="50" cy="73" rx="18" ry="12" fill="#A5D6A7"/><path d="M34 73 Q50 85 66 73" stroke="#2E7D32" stroke-width="3" fill="none" stroke-linecap="round"/></svg></span>
+        <div class="gc-title">Tko prolazi?</div>
+        <div class="gc-desc">Klikni samo traženu životinju!</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ DIFFICULTY ══════════════ -->
+<div id="screen-diff" class="screen">
+  <button class="diff-back" onclick="goHome()">←</button>
+  <div class="diff-inner">
+    <p class="diff-game-name" id="diff-gname">Pogodi životinju</p>
+    <h2 class="diff-title">Odaberi težinu</h2>
+    <div class="diff-cards">
+      <div class="diff-card" onclick="chooseDiff('easy')">
+        <span class="diff-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="2.2rem" height="2.2rem"><ellipse cx="50" cy="58" rx="28" ry="34" fill="#FFF9C4" stroke="#F9A825" stroke-width="3"/><polyline points="36,52 44,43 52,52 60,43" fill="none" stroke="#F9A825" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="44" cy="66" r="3.5" fill="#F9A825" opacity=".5"/><circle cx="56" cy="69" r="3" fill="#F9A825" opacity=".4"/></svg></span>
+        <div class="diff-info">
+          <div class="diff-name">Lako</div>
+          <div class="diff-hint">Više vremena · manje životinja · ponavljaju se</div>
+        </div>
+        <span class="diff-badge dbg-easy">LAKO</span>
+      </div>
+      <div class="diff-card" onclick="chooseDiff('medium')">
+        <span class="diff-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="2.2rem" height="2.2rem"><circle cx="26" cy="33" r="15" fill="#4CAF50"/><circle cx="74" cy="33" r="15" fill="#4CAF50"/><circle cx="26" cy="33" r="10" fill="#1a1a1a"/><circle cx="74" cy="33" r="10" fill="#1a1a1a"/><circle cx="29" cy="30" r="3.5" fill="#fff"/><circle cx="77" cy="30" r="3.5" fill="#fff"/><circle cx="50" cy="63" r="30" fill="#66BB6A"/><ellipse cx="50" cy="73" rx="18" ry="12" fill="#A5D6A7"/><path d="M34 73 Q50 85 66 73" stroke="#2E7D32" stroke-width="3" fill="none" stroke-linecap="round"/></svg></span>
+        <div class="diff-info">
+          <div class="diff-name">Srednje</div>
+          <div class="diff-hint">Standardna igra · za svakoga</div>
+        </div>
+        <span class="diff-badge dbg-med">SREDNJE</span>
+      </div>
+      <div class="diff-card" onclick="chooseDiff('hard')">
+        <span class="diff-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="2.2rem" height="2.2rem"><circle cx="50" cy="52" r="34" fill="#E07830"/><circle cx="50" cy="52" r="24" fill="#F5C842"/><ellipse cx="50" cy="63" rx="12" ry="8" fill="#E8A840"/><ellipse cx="50" cy="59" rx="5" ry="3.5" fill="#B85820"/><circle cx="39" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="61" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="41" cy="44" r="2" fill="#fff"/><circle cx="63" cy="44" r="2" fill="#fff"/><path d="M42 68 Q50 74 58 68" stroke="#A04010" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></span>
+        <div class="diff-info">
+          <div class="diff-name">Teško</div>
+          <div class="diff-hint">Manje vremena · više životinja · bez ponavljanja</div>
+        </div>
+        <span class="diff-badge dbg-hard">TEŠKO</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ GAME 1 ══════════════ -->
+<div id="screen-game1" class="screen">
+  <div class="ghdr">
+    <button class="btn-back" onclick="goHome()">←</button>
+    <span class="ghdr-title">Pogodi životinju</span>
+    <div class="score-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.1em" height="1.1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg> <span id="g1-score">0</span></div>
+  </div>
+  <div class="gcont">
+    <div class="pbar-wrap"><div id="g1-pbar" class="pbar" style="width:0%"></div></div>
+    <div class="qctr" id="g1-qctr">Pitanje 1 od 10</div>
+    <div class="g1-prompt"><h2>Koja je ovo životinja?</h2></div>
+    <button class="btn-snd" onclick="g1Repeat()">▶ Ponovi zvuk</button>
+    <div class="agrid" id="g1-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════ GAME 2 ══════════════ -->
+<div id="screen-game2" class="screen">
+  <div class="ghdr">
+    <button class="btn-back" onclick="goHome()">←</button>
+    <span class="ghdr-title">Uparivanje</span>
+    <div class="score-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.1em" height="1.1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg> <span id="g2-score">0</span></div>
+  </div>
+  <div class="gcont">
+    <div class="instr"><p>Klikni zvučnu karticu, čuj životinju, zatim klikni njenu sliku!</p></div>
+    <div class="g2-wrap">
+      <div class="g2-lbl">♪ Zvučne kartice</div>
+      <div class="g2sg" id="g2-sg"></div>
+      <div class="g2-lbl">Slike životinja</div>
+      <div class="g2ig" id="g2-ig"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ GAME 3 ══════════════ -->
+<div id="screen-game3" class="screen">
+  <div class="ghdr">
+    <button class="btn-back" onclick="goHome()">←</button>
+    <span class="ghdr-title">Brzinac</span>
+    <div class="score-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.1em" height="1.1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg> <span id="g3-score">0</span></div>
+  </div>
+  <div class="gcont">
+    <div class="qctr" id="g3-qctr" style="color:var(--g3dk)">Runda 1 od 8</div>
+    <div class="g3-target">
+      <div class="g3-tlbl">Klikni ovu životinju:</div>
+      <div class="g3-tanim" id="g3-txt">Pas</div>
+    </div>
+    <div class="g3-tmr">
+      <div class="g3-tmr-top"><span>Žuri se!</span><span id="g3-tleft">5.0s</span></div>
+      <div class="g3-tbar-wrap"><div id="g3-tbar" class="g3-tbar"></div></div>
+    </div>
+    <div class="agrid" id="g3-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════ GAME 4 ══════════════ -->
+<div id="screen-game4" class="screen">
+  <div class="ghdr">
+    <button class="btn-back" onclick="goHome()">←</button>
+    <span class="ghdr-title">Tko prolazi?</span>
+    <div class="score-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.1em" height="1.1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg> <span id="g4-score">0</span></div>
+  </div>
+  <div class="gcont">
+    <div class="g4-target">
+      <div class="g4-tlbl">Klikni SAMO:</div>
+      <div class="g4-tanim" id="g4-txt">PAS</div>
+    </div>
+    <div class="g4-stage" id="g4-stage">
+      <div class="g4-wait">Spremi se…</div>
+    </div>
+    <div class="g4-dots" id="g4-dots"></div>
+    <div class="g4-pts" id="g4-pts">Bodovi: 0</div>
+  </div>
+</div>
+
+<!-- ══════════════ RESULT ══════════════ -->
+<div id="screen-result" class="screen">
+  <header class="hdr">
+    <span class="hdr-logo">ZooSluh</span>
+    <div class="hdr-stars"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.1em" height="1.1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg> <span id="r-stars">0</span></div>
+  </header>
+  <div class="res-body">
+    <div class="res-stars" id="r-emoji"></div>
+    <div class="res-score" id="r-pts">+10</div>
+    <div class="res-msg" id="r-msg">Odlično!</div>
+    <div class="res-btns">
+      <button class="btn btn-lg btn-gold" onclick="playAgain()">↺ Igraj opet</button>
+      <button class="btn btn-lg btn-gray" onclick="goHome()">← Odaberi igru</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DATA
+═══════════════════════════════════════ */
+/* ── ANIMAL SVG ILLUSTRATIONS ── */
+const ASVG = {
+  0:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="27" cy="45" rx="13" ry="19" fill="#8B5E3C"/><ellipse cx="73" cy="45" rx="13" ry="19" fill="#8B5E3C"/><circle cx="50" cy="54" r="28" fill="#C88B4A"/><ellipse cx="50" cy="64" rx="13" ry="9" fill="#E5A870"/><ellipse cx="50" cy="59" rx="6" ry="4.5" fill="#4A2800"/><circle cx="37" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="63" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="39" cy="44" r="2" fill="#fff"/><circle cx="65" cy="44" r="2" fill="#fff"/><path d="M42 70 Q50 77 58 70" stroke="#4A2800" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>',
+  1:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><polygon points="24,38 12,8 40,28" fill="#E07830"/><polygon points="76,38 88,8 60,28" fill="#E07830"/><polygon points="24,38 18,16 38,30" fill="#F9BFBF"/><polygon points="76,38 82,16 62,30" fill="#F9BFBF"/><circle cx="50" cy="55" r="28" fill="#F0944A"/><ellipse cx="50" cy="66" rx="11" ry="8" fill="#F5C080"/><ellipse cx="50" cy="62" rx="4" ry="3" fill="#C06020"/><circle cx="38" cy="46" r="6" fill="#1a1a1a"/><circle cx="62" cy="46" r="6" fill="#1a1a1a"/><circle cx="40" cy="44" r="2" fill="#fff"/><circle cx="64" cy="44" r="2" fill="#fff"/><line x1="28" y1="64" x2="46" y2="65" stroke="#A04010" stroke-width="1.5"/><line x1="72" y1="64" x2="54" y2="65" stroke="#A04010" stroke-width="1.5"/><path d="M43 72 Q50 77 57 72" stroke="#A04010" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+  2:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="50" cy="54" r="30" fill="#F2F2F2"/><path d="M36 28 Q43 16 50 22 Q57 12 66 26 Q59 20 50 24 Q43 18 36 28Z" fill="#555"/><ellipse cx="44" cy="52" rx="9" ry="11" fill="#555"/><ellipse cx="50" cy="67" rx="13" ry="9" fill="#FFBFC8"/><circle cx="45" cy="64" r="2.8" fill="#C06070"/><circle cx="55" cy="64" r="2.8" fill="#C06070"/><circle cx="36" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="66" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="38" cy="44" r="2" fill="#fff"/><circle cx="68" cy="44" r="2" fill="#fff"/></svg>',
+  3:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="22" cy="36" rx="11" ry="9" fill="#F0A0B0"/><ellipse cx="78" cy="36" rx="11" ry="9" fill="#F0A0B0"/><circle cx="50" cy="54" r="30" fill="#F4B8C8"/><circle cx="50" cy="64" r="14" fill="#F090A8"/><circle cx="44" cy="63" r="4" fill="#C05870"/><circle cx="56" cy="63" r="4" fill="#C05870"/><circle cx="37" cy="45" r="5.5" fill="#1a1a1a"/><circle cx="63" cy="45" r="5.5" fill="#1a1a1a"/><circle cx="39" cy="43" r="2" fill="#fff"/><circle cx="65" cy="43" r="2" fill="#fff"/><path d="M42 74 Q50 80 58 74" stroke="#C05870" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>',
+  4:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="26" cy="33" r="15" fill="#4CAF50"/><circle cx="74" cy="33" r="15" fill="#4CAF50"/><circle cx="26" cy="33" r="10" fill="#1a1a1a"/><circle cx="74" cy="33" r="10" fill="#1a1a1a"/><circle cx="29" cy="30" r="3.5" fill="#fff"/><circle cx="77" cy="30" r="3.5" fill="#fff"/><circle cx="50" cy="63" r="30" fill="#66BB6A"/><ellipse cx="50" cy="73" rx="18" ry="12" fill="#A5D6A7"/><path d="M34 73 Q50 85 66 73" stroke="#2E7D32" stroke-width="3" fill="none" stroke-linecap="round"/></svg>',
+  5:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><circle cx="50" cy="52" r="34" fill="#E07830"/><circle cx="50" cy="52" r="24" fill="#F5C842"/><ellipse cx="50" cy="63" rx="12" ry="8" fill="#E8A840"/><ellipse cx="50" cy="59" rx="5" ry="3.5" fill="#B85820"/><circle cx="39" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="61" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="41" cy="44" r="2" fill="#fff"/><circle cx="63" cy="44" r="2" fill="#fff"/><line x1="28" y1="60" x2="44" y2="62" stroke="#A04010" stroke-width="1.5"/><line x1="72" y1="60" x2="56" y2="62" stroke="#A04010" stroke-width="1.5"/><path d="M42 68 Q50 74 58 68" stroke="#A04010" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>',
+  6:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><ellipse cx="50" cy="62" rx="28" ry="22" fill="#FFD740"/><circle cx="50" cy="36" r="20" fill="#FFD740"/><polygon points="68,36 87,30 87,42" fill="#FF8F00"/><circle cx="43" cy="30" r="6" fill="#1a1a1a"/><circle cx="45" cy="28" r="2" fill="#fff"/><ellipse cx="37" cy="58" rx="10" ry="7" fill="#FFC107" transform="rotate(-15 37 58)"/><path d="M36 74 Q50 82 64 74" stroke="#E0A000" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>',
+  7:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1em" height="1em"><polygon points="22,44 12,12 38,32" fill="#78909C"/><polygon points="78,44 88,12 62,32" fill="#78909C"/><polygon points="22,44 16,20 36,34" fill="#ECEFF1"/><polygon points="78,44 84,20 64,34" fill="#ECEFF1"/><circle cx="50" cy="54" r="28" fill="#90A4AE"/><ellipse cx="50" cy="64" rx="14" ry="9" fill="#ECEFF1"/><ellipse cx="50" cy="60" rx="6" ry="4" fill="#607D8B"/><circle cx="37" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="63" cy="46" r="5.5" fill="#1a1a1a"/><circle cx="39" cy="44" r="2" fill="#fff"/><circle cx="65" cy="44" r="2" fill="#fff"/><path d="M42 70 Q50 76 58 70" stroke="#37474F" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>'
+};
+const SVG_STAR = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor" stroke="currentColor" stroke-width=".5" stroke-linejoin="round"/></svg>';
+const SI_SVG  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.73 2.5-2.25 2.5-4.02z" fill="currentColor"/></svg>';
+
+const ANIMALS = [
+  {id:0,name:'Pas'},
+  {id:1,name:'Mačka'},
+  {id:2,name:'Krava'},
+  {id:3,name:'Svinja'},
+  {id:4,name:'Žaba'},
+  {id:5,name:'Lav'},
+  {id:6,name:'Patka'},
+  {id:7,name:'Vuk'},
+];
+
+/* ─── DIFFICULTY CONFIG ─── */
+const DIFF = {
+  easy:  {opts:3, pairs:3, time:8,  seqLen:10, targets:3, clickTime:2200},
+  medium:{opts:4, pairs:4, time:5,  seqLen:10, targets:3, clickTime:1500},
+  hard:  {opts:6, pairs:6, time:3,  seqLen:14, targets:5, clickTime:900}
+};
+const GAME_NAMES = ['','Pogodi životinju','Uparivanje','Brzinac','Tko prolazi?'];
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const gameState = {
+  totalStars:0, currentGame:0, difficulty:'medium',
+  g1:{score:0,qi:0,cur:null,done:false,qs:[],ntid:null,opts:4},
+  g2:{score:0,sel:null,matched:0,pool:[]},
+  g3:{score:0,ri:0,cur:null,answered:false,tid:null,ntid:null,t0:0,qs:[],timePerRound:5},
+  g4:{score:0,target:null,seq:[],idx:0,clickable:false,stid:null,ntid:null,clickTime:1500,seqLen:10,maxScore:3},
+};
+
+/* ═══════════════════════════════════════
+   AUDIO
+═══════════════════════════════════════ */
+let _actx = null;
+function actx() {
+  if (!_actx) _actx = new (window.AudioContext||window.webkitAudioContext)();
+  if (_actx.state==='suspended') _actx.resume();
+  return _actx;
+}
+function tone(freq,dur,shape,vol){
+  shape=shape||'sine'; vol=vol||0.28;
+  try{
+    const c=actx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=shape;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+    o.start(c.currentTime);o.stop(c.currentTime+dur);
+  }catch(e){}
+}
+function playOk(){
+  tone(523,.12);
+  setTimeout(function(){tone(659,.12)},90);
+  setTimeout(function(){tone(784,.22)},180);
+}
+function playErr(){tone(200,.3,'sawtooth',.22)}
+
+/* ── ANIMAL SOUNDS — pravi snimci (Wikimedia Commons, CC licenca) ── */
+var _SURL=[
+  'https://upload.wikimedia.org/wikipedia/commons/a/a2/Barking_of_a_dog.ogg',               // 0 Pas
+  'https://upload.wikimedia.org/wikipedia/commons/6/62/Meow.ogg',                           // 1 Mačka
+  'https://upload.wikimedia.org/wikipedia/commons/4/48/Mudchute_cow_1.ogg',                 // 2 Krava
+  'https://upload.wikimedia.org/wikipedia/commons/7/73/Mudchute_pig_1.ogg',                 // 3 Svinja
+  'https://upload.wikimedia.org/wikipedia/commons/9/94/Frog_sounds.ogg',                    // 4 Žaba
+  'https://upload.wikimedia.org/wikipedia/commons/7/7d/Lion_raring-sound1TamilNadu178.ogg', // 5 Lav
+  'https://upload.wikimedia.org/wikipedia/commons/b/b4/Ducks_landing_in_water.ogg',         // 6 Patka
+  'https://upload.wikimedia.org/wikipedia/commons/8/87/Wolf_howls.ogg'                      // 7 Vuk
+];
+var _AP=[];      /* audio pool — preloadani elementi */
+var _stopTid=null;
+
+function _initSounds(){
+  _SURL.forEach(function(url,i){
+    var a=new Audio();
+    a.preload='auto';
+    a.src=url;
+    a.volume=0.88;
+    _AP[i]=a;
+  });
+}
+
+function animalSound(id){
+  /* zaustavi prethodni zvuk */
+  if(_stopTid){clearTimeout(_stopTid);_stopTid=null}
+  _AP.forEach(function(a){try{if(a&&!a.paused){a.pause();a.currentTime=0;}}catch(e){}});
+  var a=_AP[id];
+  if(!a)return;
+  try{
+    a.currentTime=0;
+    var p=a.play();
+    if(p)p.catch(function(){});
+    /* ograniči trajanje na 4 sekunde da predugački snimci ne smetaju */
+    _stopTid=setTimeout(function(){try{a.pause();}catch(e){}},4000);
+  }catch(e){}
+}
+
+/* ═══════════════════════════════════════
+   SCREEN MANAGEMENT
+═══════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);
+  if(el){el.classList.add('active');el.scrollTop=0}
+  syncStars();
+}
+function syncStars(){
+  ['h-stars','r-stars'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.textContent=gameState.totalStars;
+  });
+}
+function goHome(){
+  clearTimers();
+  showScreen('screen-home');
+}
+function clearTimers(){
+  var s=gameState;
+  if(s.g1.ntid){clearTimeout(s.g1.ntid);s.g1.ntid=null}
+  if(s.g3.tid){clearInterval(s.g3.tid);s.g3.tid=null}
+  if(s.g3.ntid){clearTimeout(s.g3.ntid);s.g3.ntid=null}
+  if(s.g4.stid){clearTimeout(s.g4.stid);s.g4.stid=null}
+  if(s.g4.ntid){clearTimeout(s.g4.ntid);s.g4.ntid=null}
+}
+function startGame(n){
+  gameState.currentGame=n;
+  var el=document.getElementById('diff-gname');
+  if(el) el.textContent=GAME_NAMES[n]||'';
+  showScreen('screen-diff');
+}
+function chooseDiff(d){gameState.difficulty=d;launchGame(gameState.currentGame)}
+function launchGame(n){[null,startGame1,startGame2,startGame3,startGame4][n]()}
+function playAgain(){launchGame(gameState.currentGame)}
+
+/* ═══════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════ */
+function shuffle(a){
+  var b=[].concat(a);
+  for(var i=b.length-1;i>0;i--){var j=0|Math.random()*(i+1);var t=b[i];b[i]=b[j];b[j]=t}
+  return b;
+}
+function pick(a,n){return shuffle(a).slice(0,n)}
+function rnd(a){return a[0|Math.random()*a.length]}
+
+function celebrate(txt){
+  var el=document.createElement('div');
+  el.className='celeb';el.textContent=txt;
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove()},1200);
+}
+function rainStars(n){
+  n=n||18;
+  var colors=['#FFD700','#FF8C00','#FF6B6B','#A29BFE','#74B9FF','#55EFC4'];
+  for(var i=0;i<n;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.className='sp';
+        var c=colors[0|Math.random()*colors.length];
+        var s=(1+Math.random()*1.4).toFixed(2);
+        el.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="'+s+'rem" height="'+s+'rem"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="'+c+'"/></svg>';
+        el.style.cssText='left:'+Math.random()*100+'vw;top:-50px;animation-duration:'+(1.6+Math.random()*2)+'s';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove()},3600);
+      },i*80);
+    })(i);
+  }
+}
+function showResult(earned,max){
+  var pct=earned/max;
+  var n=pct>=.9?3:pct>=.6?2:1;
+  var starsHTML='';for(var i=0;i<n;i++)starsHTML+=SVG_STAR;
+  var msg=pct>=.9?'Odlično! Pravi zvjerski majstor!':pct>=.6?'Bravo! Jako si dobar/dobra!':'Pokušaj opet, možeš bolje!';
+  gameState.totalStars+=earned;
+  document.getElementById('r-emoji').innerHTML=starsHTML;
+  document.getElementById('r-pts').innerHTML='+'+earned+' '+SVG_STAR;
+  document.getElementById('r-msg').textContent=msg;
+  showScreen('screen-result');
+  rainStars(pct>=.9?30:16);
+}
+
+/* ═══════════════════════════════════════
+   GAME 1 — POGODI ŽIVOTINJU
+═══════════════════════════════════════ */
+function startGame1(){
+  var s=gameState.g1;
+  var d=DIFF[gameState.difficulty];
+  s.score=0;s.qi=0;s.done=false;s.ntid=null;s.opts=d.opts;
+  s.qs=[];
+  if(gameState.difficulty==='hard'){
+    var pool=shuffle([].concat(ANIMALS));
+    for(var i=0;i<10;i++) s.qs.push(pool[i%ANIMALS.length]);
+  } else {
+    for(var i=0;i<10;i++) s.qs.push(rnd(ANIMALS));
+  }
+  document.getElementById('g1-score').textContent='0';
+  showScreen('screen-game1');
+  s.ntid=setTimeout(g1Question,320);
+}
+function g1Question(){
+  if(!document.getElementById('screen-game1').classList.contains('active'))return;
+  var s=gameState.g1;
+  var opts=s.opts||4;
+  if(s.qi>=10){showResult(s.score,10);return}
+  s.done=false;s.cur=s.qs[s.qi];
+  document.getElementById('g1-pbar').style.width=(s.qi/10*100)+'%';
+  document.getElementById('g1-qctr').textContent='Pitanje '+(s.qi+1)+' od 10';
+  var wrong=pick(ANIMALS.filter(function(a){return a.id!==s.cur.id}),opts-1);
+  var choices=shuffle([s.cur].concat(wrong));
+  var grid=document.getElementById('g1-grid');grid.innerHTML='';
+  grid.style.gridTemplateColumns=opts>=6?'repeat(3,1fr)':'repeat(2,1fr)';
+  choices.forEach(function(a,i){
+    var c=document.createElement('div');c.className='acard';
+    c.style.animationDelay=(i*.07)+'s';
+    c.innerHTML='<span class="ae">'+ASVG[a.id]+'</span><span class="an">'+a.name+'</span>';
+    c.addEventListener('click',function(){g1Answer(a,c)});
+    grid.appendChild(c);
+  });
+  setTimeout(function(){animalSound(s.cur.id)},360);
+}
+function g1Repeat(){if(gameState.g1.cur) animalSound(gameState.g1.cur.id)}
+function g1Answer(chosen,el){
+  var s=gameState.g1;
+  if(s.done)return;s.done=true;
+  document.querySelectorAll('#g1-grid .acard').forEach(function(c){c.style.pointerEvents='none'});
+  if(chosen.id===s.cur.id){
+    el.classList.add('correct');s.score++;
+    document.getElementById('g1-score').textContent=s.score;
+    playOk();celebrate('✔ Točno!');
+  } else {
+    el.classList.add('wrong');playErr();celebrate('✘ Netočno!');
+    document.querySelectorAll('#g1-grid .acard').forEach(function(c){
+      if(c.querySelector('.an').textContent===s.cur.name){
+        c.style.background='#E8F5E9';c.style.borderColor='var(--ok)';
+      }
+    });
+  }
+  s.qi++;
+  s.ntid=setTimeout(function(){
+    if(s.qi>=10) showResult(s.score,10); else g1Question();
+  },1150);
+}
+
+/* ═══════════════════════════════════════
+   GAME 2 — UPARIVANJE
+═══════════════════════════════════════ */
+function startGame2(){
+  var s=gameState.g2;
+  var d=DIFF[gameState.difficulty];
+  s.score=0;s.sel=null;s.matched=0;
+  s.pool=pick(ANIMALS,d.pairs);
+  document.getElementById('g2-score').textContent='0';
+  showScreen('screen-game2');
+  setTimeout(g2Render,220);
+}
+function g2Render(){
+  var s=gameState.g2;
+  var cols=s.pool.length>=5?3:2;
+  var sg=document.getElementById('g2-sg');sg.innerHTML='';
+  sg.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  var ig=document.getElementById('g2-ig');ig.innerHTML='';
+  ig.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  s.pool.forEach(function(a){
+    var c=document.createElement('div');c.className='g2sc';c.id='g2s'+a.id;
+    c.innerHTML='<span class="si">'+SI_SVG+'</span><span class="sn">'+a.name+'</span>';
+    c.addEventListener('click',function(){g2SelSound(a,c)});
+    sg.appendChild(c);
+  });
+  shuffle(s.pool).forEach(function(a){
+    var c=document.createElement('div');c.className='g2ic';c.id='g2i'+a.id;
+    c.innerHTML='<span class="ie">'+ASVG[a.id]+'</span>';
+    c.addEventListener('click',function(){g2SelImg(a,c)});
+    ig.appendChild(c);
+  });
+}
+function g2SelSound(a,el){
+  document.querySelectorAll('.g2sc').forEach(function(c){c.classList.remove('sel')});
+  el.classList.add('sel');gameState.g2.sel=a;animalSound(a.id);
+}
+function g2SelImg(a,el){
+  var s=gameState.g2;
+  if(!s.sel){
+    el.classList.add('wrong');
+    setTimeout(function(){el.classList.remove('wrong')},560);
+    return;
+  }
+  if(s.sel.id===a.id){
+    s.score++;s.matched++;
+    document.getElementById('g2-score').textContent=s.score;
+    playOk();celebrate('Bravo!');
+    var sc=document.getElementById('g2s'+a.id);
+    if(sc) sc.classList.add('matched');
+    el.classList.add('matched');s.sel=null;
+    if(s.matched===s.pool.length) setTimeout(function(){showResult(s.score,s.pool.length)},700);
+  } else {
+    playErr();
+    el.classList.add('wrong');
+    setTimeout(function(){el.classList.remove('wrong')},560);
+    document.querySelectorAll('.g2sc').forEach(function(c){c.classList.remove('sel')});
+    s.sel=null;
+  }
+}
+
+/* ═══════════════════════════════════════
+   GAME 3 — BRZINAC
+═══════════════════════════════════════ */
+function startGame3(){
+  var s=gameState.g3;
+  var d=DIFF[gameState.difficulty];
+  s.score=0;s.ri=0;s.answered=false;s.ntid=null;s.timePerRound=d.time;
+  if(s.tid){clearInterval(s.tid);s.tid=null}
+  s.qs=[];
+  if(gameState.difficulty==='hard'){
+    s.qs=shuffle([].concat(ANIMALS)); // 8 unique, no repeats
+  } else {
+    for(var i=0;i<8;i++) s.qs.push(rnd(ANIMALS));
+  }
+  document.getElementById('g3-score').textContent='0';
+  showScreen('screen-game3');
+  s.ntid=setTimeout(g3Round,380);
+}
+function g3Round(){
+  if(!document.getElementById('screen-game3').classList.contains('active'))return;
+  var s=gameState.g3;
+  var total=s.qs.length;
+  if(s.ri>=total){showResult(s.score,total*3);return}
+  if(s.tid){clearInterval(s.tid);s.tid=null}
+  s.answered=false;s.cur=s.qs[s.ri];
+  document.getElementById('g3-qctr').textContent='Runda '+(s.ri+1)+' od '+total;
+  document.getElementById('g3-txt').innerHTML=ASVG[s.cur.id]+' '+s.cur.name;
+  var wrong=pick(ANIMALS.filter(function(a){return a.id!==s.cur.id}),3);
+  var choices=shuffle([s.cur].concat(wrong));
+  var grid=document.getElementById('g3-grid');grid.innerHTML='';
+  choices.forEach(function(a,i){
+    var c=document.createElement('div');c.className='acard';
+    c.style.animationDelay=(i*.07)+'s';
+    c.innerHTML='<span class="ae">'+ASVG[a.id]+'</span><span class="an">'+a.name+'</span>';
+    c.addEventListener('click',function(){g3Answer(a,c)});
+    grid.appendChild(c);
+  });
+  /* Timer — duration from difficulty */
+  var tl=s.timePerRound||5;
+  var bar=document.getElementById('g3-tbar');
+  bar.className='g3-tbar';
+  bar.style.transition='none';bar.style.width='100%';
+  void bar.offsetWidth;
+  bar.style.transition='width '+tl+'s linear';bar.style.width='0%';
+  s.t0=Date.now();
+  var lbl=document.getElementById('g3-tleft');
+  var urgentAt=tl*0.3;
+  s.tid=setInterval(function(){
+    tl-=0.1;
+    lbl.textContent=Math.max(0,tl).toFixed(1)+'s';
+    if(tl<=urgentAt) bar.className='g3-tbar urgent';
+    if(tl<=0){clearInterval(s.tid);s.tid=null;if(!s.answered)g3Timeout()}
+  },100);
+  setTimeout(function(){animalSound(s.cur.id)},320);
+}
+function g3Answer(chosen,el){
+  var s=gameState.g3;
+  if(s.answered)return;s.answered=true;
+  if(s.tid){clearInterval(s.tid);s.tid=null}
+  var ms=Date.now()-s.t0;
+  var total=s.qs.length;
+  document.querySelectorAll('#g3-grid .acard').forEach(function(c){c.style.pointerEvents='none'});
+  if(chosen.id===s.cur.id){
+    var tMs=(s.timePerRound||5)*1000;
+    var pts=ms<tMs*.3?3:ms<tMs*.6?2:1;
+    s.score+=pts;document.getElementById('g3-score').textContent=s.score;
+    el.classList.add('correct');playOk();
+    celebrate(pts===3?'Munja! +3':pts===2?'Brzo! +2':'+1');
+  } else {
+    el.classList.add('wrong');playErr();celebrate('✘ Krivo!');
+  }
+  s.ri++;
+  s.ntid=setTimeout(function(){if(s.ri>=total) showResult(s.score,total*3); else g3Round()},1150);
+}
+function g3Timeout(){
+  var s=gameState.g3;s.answered=true;
+  var total=s.qs.length;
+  playErr();celebrate('Prekasno!');
+  document.querySelectorAll('#g3-grid .acard').forEach(function(c){c.style.pointerEvents='none'});
+  s.ri++;
+  s.ntid=setTimeout(function(){if(s.ri>=total) showResult(s.score,total*3); else g3Round()},1150);
+}
+
+/* ═══════════════════════════════════════
+   GAME 4 — TKO PROLAZI
+═══════════════════════════════════════ */
+function startGame4(){
+  var s=gameState.g4;
+  var d=DIFF[gameState.difficulty];
+  s.score=0;s.idx=0;s.clickable=false;s.clickTime=d.clickTime;s.seqLen=d.seqLen;s.maxScore=d.targets;
+  if(s.stid){clearTimeout(s.stid);s.stid=null}
+  if(s.ntid){clearTimeout(s.ntid);s.ntid=null}
+  s.target=rnd(ANIMALS);
+  document.getElementById('g4-txt').innerHTML=ASVG[s.target.id]+' '+s.target.name.toUpperCase();
+  document.getElementById('g4-score').textContent='0';
+  document.getElementById('g4-pts').textContent='Bodovi: 0';
+  /* build sequence with difficulty-scaled targets */
+  var nonT=ANIMALS.filter(function(a){return a.id!==s.target.id});
+  var tArr=[];for(var i=0;i<d.targets;i++) tArr.push(s.target);
+  s.seq=shuffle(tArr.concat(pick(nonT,d.seqLen-d.targets)));
+  /* dots */
+  var dotsEl=document.getElementById('g4-dots');dotsEl.innerHTML='';
+  for(var i=0;i<d.seqLen;i++){
+    var dot=document.createElement('div');dot.className='dot';dot.id='g4d'+i;
+    dotsEl.appendChild(dot);
+  }
+  showScreen('screen-game4');
+  setTimeout(function(){
+    animalSound(s.target.id);
+    s.ntid=setTimeout(g4Next,1900);
+  },400);
+}
+function g4Next(){
+  if(!document.getElementById('screen-game4').classList.contains('active'))return;
+  var s=gameState.g4;
+  if(s.idx>=s.seqLen){showResult(Math.max(0,s.score),s.maxScore);return}
+  var dotEl=document.getElementById('g4d'+s.idx);
+  if(dotEl) dotEl.className='dot cur';
+  var a=s.seq[s.idx];
+  var isT=(a.id===s.target.id);
+  var stage=document.getElementById('g4-stage');stage.innerHTML='';
+  var disp=document.createElement('div');disp.className='g4-ad';
+  disp.innerHTML='<span class="g4-ae">'+ASVG[a.id]+'</span><div class="g4-an">'+a.name+'</div>';
+  stage.appendChild(disp);
+  s.clickable=true;var clicked=false;
+  if(isT) setTimeout(function(){animalSound(a.id)},80);
+  disp.addEventListener('click',function(){
+    if(!s.clickable)return;s.clickable=false;clicked=true;
+    if(s.stid){clearTimeout(s.stid);s.stid=null}
+    if(isT){
+      s.score++;
+      document.getElementById('g4-score').textContent=s.score;
+      document.getElementById('g4-pts').textContent='Bodovi: '+s.score;
+      playOk();disp.style.background='#E8F5E9';
+      if(dotEl) dotEl.className='dot ok';celebrate('✔ Bravo!');
+    } else {
+      s.score=Math.max(0,s.score-1);
+      document.getElementById('g4-score').textContent=s.score;
+      document.getElementById('g4-pts').textContent='Bodovi: '+s.score;
+      playErr();disp.style.background='#FFEBEE';disp.style.animation='shake .48s ease';
+      if(dotEl) dotEl.className='dot err';celebrate('✘ Ne!');
+    }
+    s.idx++;
+    s.ntid=setTimeout(g4Next,550);
+  });
+  s.stid=setTimeout(function(){
+    if(clicked||!s.clickable)return;s.clickable=false;
+    if(isT){if(dotEl) dotEl.className='dot miss';celebrate('Promašaj!')}
+    else {if(dotEl) dotEl.className='dot ok'}
+    s.idx++;g4Next();
+  },s.clickTime||1500);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+_initSounds();
+showScreen('screen-splash');
+</script>
+</body>
+</html>
