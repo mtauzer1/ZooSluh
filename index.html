@@ -613,69 +613,243 @@ const gameState = {
 };
 
 /* ═══════════════════════════════════════
-   AUDIO
+   AUDIO — pure WebAudio API synthesis
 ═══════════════════════════════════════ */
-let _actx = null;
-function actx() {
-  if (!_actx) _actx = new (window.AudioContext||window.webkitAudioContext)();
-  if (_actx.state==='suspended') _actx.resume();
+let _actx=null;
+function actx(){
+  if(!_actx) _actx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==='suspended') _actx.resume();
   return _actx;
 }
-function tone(freq,dur,shape,vol){
-  shape=shape||'sine'; vol=vol||0.28;
-  try{
-    const c=actx(),o=c.createOscillator(),g=c.createGain();
-    o.connect(g);g.connect(c.destination);
-    o.type=shape;o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
-    o.start(c.currentTime);o.stop(c.currentTime+dur);
-  }catch(e){}
+/* mono white-noise buffer of given duration */
+function _noise(c,dur){
+  var n=~~(c.sampleRate*dur),buf=c.createBuffer(1,n,c.sampleRate),d=buf.getChannelData(0);
+  for(var i=0;i<n;i++) d[i]=Math.random()*2-1;
+  return buf;
 }
+
+/* ── UI SOUNDS ── */
+
+/* Correct answer — C5→E5→G5 ascending sine arpeggio, bouncy */
 function playOk(){
-  tone(523,.12);
-  setTimeout(function(){tone(659,.12)},90);
-  setTimeout(function(){tone(784,.22)},180);
-}
-function playErr(){tone(200,.3,'sawtooth',.22)}
-
-/* ── ANIMAL SOUNDS — pravi snimci (Wikimedia Commons, CC licenca) ── */
-var _SURL=[
-  'https://upload.wikimedia.org/wikipedia/commons/a/a2/Barking_of_a_dog.ogg',               // 0 Pas
-  'https://upload.wikimedia.org/wikipedia/commons/6/62/Meow.ogg',                           // 1 Mačka
-  'https://upload.wikimedia.org/wikipedia/commons/4/48/Mudchute_cow_1.ogg',                 // 2 Krava
-  'https://upload.wikimedia.org/wikipedia/commons/7/73/Mudchute_pig_1.ogg',                 // 3 Svinja
-  'https://upload.wikimedia.org/wikipedia/commons/9/94/Frog_sounds.ogg',                    // 4 Žaba
-  'https://upload.wikimedia.org/wikipedia/commons/7/7d/Lion_raring-sound1TamilNadu178.ogg', // 5 Lav
-  'https://upload.wikimedia.org/wikipedia/commons/b/b4/Ducks_landing_in_water.ogg',         // 6 Patka
-  'https://upload.wikimedia.org/wikipedia/commons/8/87/Wolf_howls.ogg'                      // 7 Vuk
-];
-var _AP=[];      /* audio pool — preloadani elementi */
-var _stopTid=null;
-
-function _initSounds(){
-  _SURL.forEach(function(url,i){
-    var a=new Audio();
-    a.preload='auto';
-    a.src=url;
-    a.volume=0.88;
-    _AP[i]=a;
-  });
-}
-
-function animalSound(id){
-  /* zaustavi prethodni zvuk */
-  if(_stopTid){clearTimeout(_stopTid);_stopTid=null}
-  _AP.forEach(function(a){try{if(a&&!a.paused){a.pause();a.currentTime=0;}}catch(e){}});
-  var a=_AP[id];
-  if(!a)return;
-  try{
-    a.currentTime=0;
-    var p=a.play();
-    if(p)p.catch(function(){});
-    /* ograniči trajanje na 4 sekunde da predugački snimci ne smetaju */
-    _stopTid=setTimeout(function(){try{a.pause();}catch(e){}},4000);
+  try{var c=actx(),t=c.currentTime,fr=[523,659,784];
+    fr.forEach(function(f,i){
+      var o=c.createOscillator(),g=c.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+i*.1);
+      g.gain.linearRampToValueAtTime(.36,t+i*.1+.02);
+      g.gain.setValueAtTime(.36,t+i*.1+.09);
+      g.gain.exponentialRampToValueAtTime(.001,t+i*.1+.21);
+      o.connect(g);g.connect(c.destination);
+      o.start(t+i*.1);o.stop(t+i*.1+.22);
+    });
   }catch(e){}
+}
+
+/* Wrong answer — sawtooth 350→200Hz wah (0.4s) + low 150Hz thud */
+function playErr(){
+  try{var c=actx(),t=c.currentTime;
+    var o=c.createOscillator(),g=c.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(350,t);
+    o.frequency.linearRampToValueAtTime(200,t+.4);
+    g.gain.setValueAtTime(.3,t);g.gain.setValueAtTime(.3,t+.32);
+    g.gain.exponentialRampToValueAtTime(.001,t+.43);
+    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.45);
+    var o2=c.createOscillator(),g2=c.createGain();
+    o2.type='sawtooth';o2.frequency.value=150;
+    g2.gain.setValueAtTime(.22,t+.38);g2.gain.exponentialRampToValueAtTime(.001,t+.56);
+    o2.connect(g2);g2.connect(c.destination);o2.start(t+.38);o2.stop(t+.57);
+  }catch(e){}
+}
+
+/* Star sparkle — rapid ascending triangle 800→1000→1200→1600Hz, bright */
+function playStar(){
+  try{var c=actx(),t=c.currentTime,fr=[800,1000,1200,1600];
+    fr.forEach(function(f,i){
+      var o=c.createOscillator(),g=c.createGain();
+      o.type='triangle';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+i*.07);
+      g.gain.linearRampToValueAtTime(.28,t+i*.07+.01);
+      g.gain.exponentialRampToValueAtTime(.001,t+i*.07+.09);
+      o.connect(g);g.connect(c.destination);
+      o.start(t+i*.07);o.stop(t+i*.07+.1);
+    });
+  }catch(e){}
+}
+
+/* Timeout buzzer — 120Hz sawtooth through lowpass 300Hz, harsh bzzz */
+function playTimeout(){
+  try{var c=actx(),t=c.currentTime;
+    var o=c.createOscillator(),flt=c.createBiquadFilter(),g=c.createGain();
+    o.type='sawtooth';o.frequency.value=120;
+    flt.type='lowpass';flt.frequency.value=300;
+    g.gain.setValueAtTime(.38,t);g.gain.setValueAtTime(.38,t+.42);
+    g.gain.exponentialRampToValueAtTime(.001,t+.54);
+    o.connect(flt);flt.connect(g);g.connect(c.destination);
+    o.start(t);o.stop(t+.56);
+  }catch(e){}
+}
+
+/* ── ANIMAL SOUNDS ── */
+function animalSound(id){
+  try{var c=actx(),t=c.currentTime;
+    switch(id){
+      case 0:_sndDog(c,t);break;  case 1:_sndCat(c,t);break;
+      case 2:_sndCow(c,t);break;  case 3:_sndPig(c,t);break;
+      case 4:_sndFrog(c,t);break; case 5:_sndLion(c,t);break;
+      case 6:_sndDuck(c,t);break; case 7:_sndWolf(c,t);break;
+    }
+  }catch(e){}
+}
+
+/* 0 — PAS: dva kratka laveža
+   White noise bandpass 1000Hz Q=2.5 (bark texture) +
+   sawtooth 600→200Hz pitch drop. Two 0.25s bursts, 0.15s gap. */
+function _sndDog(c,t){
+  for(var i=0;i<2;i++){var off=i*.4;
+    var src=c.createBufferSource();src.buffer=_noise(c,.3);
+    var bpf=c.createBiquadFilter();bpf.type='bandpass';bpf.frequency.value=1000;bpf.Q.value=2.5;
+    var ng=c.createGain();
+    ng.gain.setValueAtTime(0,t+off);ng.gain.linearRampToValueAtTime(.72,t+off+.02);
+    ng.gain.setValueAtTime(.72,t+off+.1);ng.gain.exponentialRampToValueAtTime(.001,t+off+.27);
+    src.connect(bpf);bpf.connect(ng);ng.connect(c.destination);src.start(t+off);src.stop(t+off+.28);
+    var o=c.createOscillator(),og=c.createGain();o.type='sawtooth';
+    o.frequency.setValueAtTime(600,t+off);o.frequency.exponentialRampToValueAtTime(200,t+off+.23);
+    og.gain.setValueAtTime(.3,t+off);og.gain.exponentialRampToValueAtTime(.001,t+off+.26);
+    o.connect(og);og.connect(c.destination);o.start(t+off);o.stop(t+off+.27);
+  }
+}
+
+/* 1 — MAČKA: "mijau"
+   Sine 350→900Hz (0.3s rise) then falls to 400Hz by 0.8s.
+   Slow attack 0.07s, long sustain, fade. Second harmonic 2× at 30% vol. */
+function _sndCat(c,t){
+  var o=c.createOscillator(),g=c.createGain();o.type='sine';
+  o.frequency.setValueAtTime(350,t);
+  o.frequency.linearRampToValueAtTime(900,t+.3);
+  o.frequency.linearRampToValueAtTime(400,t+.8);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.38,t+.07);
+  g.gain.setValueAtTime(.38,t+.55);g.gain.linearRampToValueAtTime(0,t+.85);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.87);
+  var o2=c.createOscillator(),g2=c.createGain();o2.type='sine';
+  o2.frequency.setValueAtTime(700,t);
+  o2.frequency.linearRampToValueAtTime(1800,t+.3);
+  o2.frequency.linearRampToValueAtTime(800,t+.8);
+  g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(.12,t+.07);
+  g2.gain.setValueAtTime(.12,t+.55);g2.gain.linearRampToValueAtTime(0,t+.85);
+  o2.connect(g2);g2.connect(c.destination);o2.start(t);o2.stop(t+.87);
+}
+
+/* 2 — KRAVA: "muuu"
+   Sawtooth 90Hz through lowpass 400Hz. Duration 1.5s.
+   Slow attack 0.3s. Vibrato ±5Hz at 4Hz via LFO connected to frequency param. */
+function _sndCow(c,t){
+  var o=c.createOscillator();
+  var lfo=c.createOscillator(),lfoG=c.createGain();
+  lfo.type='sine';lfo.frequency.value=4;lfoG.gain.value=5;
+  lfo.connect(lfoG);lfoG.connect(o.frequency);lfo.start(t);lfo.stop(t+1.6);
+  var flt=c.createBiquadFilter();flt.type='lowpass';flt.frequency.value=400;
+  var g=c.createGain();o.type='sawtooth';o.frequency.value=90;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.48,t+.3);
+  g.gain.setValueAtTime(.48,t+1.1);g.gain.linearRampToValueAtTime(0,t+1.55);
+  o.connect(flt);flt.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.58);
+}
+
+/* 3 — SVINJA: "oink oink"
+   Sawtooth 280→420→260Hz sweep through bandpass 350Hz Q=3 (nasal).
+   Two bursts 0.25s each, 0.2s gap. */
+function _sndPig(c,t){
+  for(var i=0;i<2;i++){var off=i*.45;
+    var o=c.createOscillator(),bpf=c.createBiquadFilter(),g=c.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(280,t+off);
+    o.frequency.linearRampToValueAtTime(420,t+off+.1);
+    o.frequency.linearRampToValueAtTime(260,t+off+.25);
+    bpf.type='bandpass';bpf.frequency.value=350;bpf.Q.value=3;
+    g.gain.setValueAtTime(0,t+off);g.gain.linearRampToValueAtTime(.44,t+off+.03);
+    g.gain.setValueAtTime(.44,t+off+.17);g.gain.exponentialRampToValueAtTime(.001,t+off+.28);
+    o.connect(bpf);bpf.connect(g);g.connect(c.destination);o.start(t+off);o.stop(t+off+.29);
+  }
+}
+
+/* 4 — ŽABA: "ribbit ribbit"
+   Square wave. Per ribbit: 3 fast pulses 170→280→170Hz, 0.09s each.
+   Attack+decay 0.05s per pulse. Two ribbits 0.5s apart. */
+function _sndFrog(c,t){
+  for(var r=0;r<2;r++){var rOff=r*.5;
+    for(var p=0;p<3;p++){var off=rOff+p*.1;
+      var o=c.createOscillator(),g=c.createGain();o.type='square';
+      o.frequency.setValueAtTime(170,t+off);
+      o.frequency.linearRampToValueAtTime(280,t+off+.04);
+      o.frequency.linearRampToValueAtTime(170,t+off+.07);
+      g.gain.setValueAtTime(0,t+off);g.gain.linearRampToValueAtTime(.3,t+off+.02);
+      g.gain.setValueAtTime(.3,t+off+.05);g.gain.exponentialRampToValueAtTime(.001,t+off+.08);
+      o.connect(g);g.connect(c.destination);o.start(t+off);o.stop(t+off+.09);
+    }
+  }
+}
+
+/* 5 — LAV: duboki rik
+   White noise through lowpass 200Hz (low rumble) + sawtooth 65→95→70Hz
+   through lowpass 500Hz. Tremolo at 8Hz: LFO ±0.18 added to gain param.
+   Slow build-up 0.45s, 2s duration. */
+function _sndLion(c,t){
+  var ns=c.createBufferSource();ns.buffer=_noise(c,2.15);
+  var nlf=c.createBiquadFilter();nlf.type='lowpass';nlf.frequency.value=200;
+  var ng=c.createGain();
+  ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.32,t+.5);
+  ng.gain.setValueAtTime(.32,t+1.75);ng.gain.linearRampToValueAtTime(0,t+2.1);
+  ns.connect(nlf);nlf.connect(ng);ng.connect(c.destination);ns.start(t);ns.stop(t+2.15);
+  var o=c.createOscillator(),flt=c.createBiquadFilter(),g=c.createGain();
+  o.type='sawtooth';
+  o.frequency.setValueAtTime(65,t);o.frequency.linearRampToValueAtTime(95,t+.6);
+  o.frequency.setValueAtTime(95,t+1.4);o.frequency.linearRampToValueAtTime(70,t+2.0);
+  flt.type='lowpass';flt.frequency.value=500;
+  var lfo=c.createOscillator(),lfoG=c.createGain();
+  lfo.type='sine';lfo.frequency.value=8;lfoG.gain.value=.18;
+  lfo.connect(lfoG);lfoG.connect(g.gain);lfo.start(t);lfo.stop(t+2.15);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.44,t+.45);
+  g.gain.setValueAtTime(.44,t+1.7);g.gain.linearRampToValueAtTime(0,t+2.08);
+  o.connect(flt);flt.connect(g);g.connect(c.destination);o.start(t);o.stop(t+2.15);
+}
+
+/* 6 — PATKA: "kvak kvak"
+   Sawtooth 800→350Hz exponential drop through bandpass 600Hz Q=4.
+   Two quacks, sharp attack 0.02s, fast decay. Very nasal character. */
+function _sndDuck(c,t){
+  for(var i=0;i<2;i++){var off=i*.35;
+    var o=c.createOscillator(),bpf=c.createBiquadFilter(),g=c.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(800,t+off);
+    o.frequency.exponentialRampToValueAtTime(350,t+off+.2);
+    bpf.type='bandpass';bpf.frequency.value=600;bpf.Q.value=4;
+    g.gain.setValueAtTime(0,t+off);g.gain.linearRampToValueAtTime(.46,t+off+.02);
+    g.gain.setValueAtTime(.46,t+off+.1);g.gain.exponentialRampToValueAtTime(.001,t+off+.24);
+    o.connect(bpf);bpf.connect(g);g.connect(c.destination);o.start(t+off);o.stop(t+off+.25);
+  }
+}
+
+/* 7 — VUK: dugačko zavijanje
+   Sine 250→700Hz (1s rise), hold 0.5s, falls to 450Hz (0.5s).
+   Octave harmonic 2× freq at 20% vol. Total 2.15s. Eerie, smooth. */
+function _sndWolf(c,t){
+  var o=c.createOscillator(),g=c.createGain();o.type='sine';
+  o.frequency.setValueAtTime(250,t);
+  o.frequency.linearRampToValueAtTime(700,t+1.0);
+  o.frequency.setValueAtTime(700,t+1.5);
+  o.frequency.linearRampToValueAtTime(450,t+2.0);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.42,t+.2);
+  g.gain.setValueAtTime(.42,t+1.9);g.gain.linearRampToValueAtTime(0,t+2.12);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+2.15);
+  var o2=c.createOscillator(),g2=c.createGain();o2.type='sine';
+  o2.frequency.setValueAtTime(500,t);
+  o2.frequency.linearRampToValueAtTime(1400,t+1.0);
+  o2.frequency.setValueAtTime(1400,t+1.5);
+  o2.frequency.linearRampToValueAtTime(900,t+2.0);
+  g2.gain.setValueAtTime(0,t);g2.gain.linearRampToValueAtTime(.09,t+.2);
+  g2.gain.setValueAtTime(.09,t+1.9);g2.gain.linearRampToValueAtTime(0,t+2.12);
+  o2.connect(g2);g2.connect(c.destination);o2.start(t);o2.stop(t+2.15);
 }
 
 /* ═══════════════════════════════════════
@@ -760,6 +934,7 @@ function showResult(earned,max){
   document.getElementById('r-pts').innerHTML='+'+earned+' '+SVG_STAR;
   document.getElementById('r-msg').textContent=msg;
   showScreen('screen-result');
+  playStar();
   rainStars(pct>=.9?30:16);
 }
 
@@ -962,7 +1137,7 @@ function g3Answer(chosen,el){
 function g3Timeout(){
   var s=gameState.g3;s.answered=true;
   var total=s.qs.length;
-  playErr();celebrate('Prekasno!');
+  playTimeout();celebrate('Prekasno!');
   document.querySelectorAll('#g3-grid .acard').forEach(function(c){c.style.pointerEvents='none'});
   s.ri++;
   s.ntid=setTimeout(function(){if(s.ri>=total) showResult(s.score,total*3); else g3Round()},1150);
@@ -1041,7 +1216,6 @@ function g4Next(){
 /* ═══════════════════════════════════════
    INIT
 ═══════════════════════════════════════ */
-_initSounds();
 showScreen('screen-splash');
 </script>
 </body>
